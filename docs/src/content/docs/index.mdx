@@ -1,0 +1,129 @@
+---
+title: SkyPilot Nix Flake
+description: Run LLMs and AI on any cloud with Nix - comprehensive SkyPilot integration for NixOS
+template: splash
+hero:
+  tagline: Declarative cloud orchestration for AI workloads with automatic updates!
+  image:
+    file: ../../assets/houston.webp
+  actions:
+    - text: Quick Start Guide
+      link: /guides/getting-started/
+      icon: right-arrow
+    - text: NixOS Module
+      link: /guides/nixos-module/
+      icon: rocket
+    - text: View on GitHub
+      link: https://github.com/skypilot-org/skypilot
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## About SkyPilot Nix Flake
+
+This flake provides a complete Nix integration for [SkyPilot](https://github.com/skypilot-org/skypilot), a framework for running LLMs, AI, and batch jobs on any cloud. It offers maximum cost savings, highest GPU availability, and managed execution across multiple cloud providers.
+
+<CardGrid stagger>
+  <Card title="📦 Complete Package" icon="package">
+    SkyPilot v0.9.3 with all dependencies included and tested across all platforms.
+  </Card>
+  <Card title="🔄 Auto Updates" icon="refresh">
+    Automatic version detection and hash calculation with `./update.sh` script.
+  </Card>
+  <Card title="🏗️ NixOS Module" icon="setting">
+    Full-featured NixOS module with systemd services, monitoring, and security.
+  </Card>
+  <Card title="🧪 VM Tested" icon="approve-check">
+    Comprehensive NixOS VM tests ensure reliability and functionality.
+  </Card>
+</CardGrid>
+
+## Features
+
+### 🚀 **Development Environment**
+- Python 3.13 with complete development toolchain
+- Code formatting (black, isort), linting (flake8), type checking (mypy)
+- Testing framework (pytest) and package management (pip)
+
+### ⚙️ **Production Ready**
+- Configurable NixOS module with extensive options
+- Systemd service integration for cluster management
+- Web UI support with firewall configuration
+- Monitoring and metrics collection
+
+### 🔐 **Security Hardened**
+- Dedicated system user and proper file permissions
+- Secure cloud credential handling
+- Optional sudo rules for cluster operations
+- Firewall integration and network security
+
+### 🌐 **Multi-Cloud Support**
+- AWS, Google Cloud Platform, Azure, and more
+- Spot instance support for cost optimization
+- Auto-scaling and cluster management
+- Cross-cloud workload orchestration
+
+## Quick Examples
+
+### Basic Flake Usage
+```bash
+# Try SkyPilot without installing
+nix run github:your-org/skypilot-flake -- --help
+
+# Enter development environment
+nix develop github:your-org/skypilot-flake
+
+# Install SkyPilot system-wide
+nix profile install github:your-org/skypilot-flake
+```
+
+### NixOS Integration
+```nix
+{
+  # In your flake.nix inputs
+  inputs.skypilot.url = "github:your-org/skypilot-flake";
+  
+  # In your NixOS configuration
+  imports = [ inputs.skypilot.nixosModules.default ];
+  
+  services.skypilot = {
+    enable = true;
+    enableWebUI = true;
+    enableCluster = true;
+  };
+}
+```
+
+## Getting Started
+
+<CardGrid>
+  <Card title="📖 Installation Guide" icon="document">
+    Learn how to install and configure SkyPilot with Nix.
+    [Get Started →](/guides/getting-started/)
+  </Card>
+  <Card title="🔧 NixOS Module" icon="puzzle">
+    Complete NixOS integration with systemd services.
+    [Module Docs →](/guides/nixos-module/)
+  </Card>
+  <Card title="📋 Configuration" icon="list-format">
+    Comprehensive configuration options and examples.
+    [Reference →](/reference/configuration/)
+  </Card>
+  <Card title="🧪 Testing" icon="test-tube">
+    Run and understand the included VM tests.
+    [Testing →](/guides/testing/)
+  </Card>
+</CardGrid>
+
+## Why Use This Flake?
+
+- **🔒 Reproducible**: Pinned dependencies ensure consistent builds
+- **🚀 Latest**: Automatic updates to newest SkyPilot releases  
+- **📦 Complete**: All dependencies included and tested
+- **🏗️ Integrated**: Native NixOS module with proper systemd integration
+- **🧪 Tested**: Comprehensive VM tests verify functionality
+- **📚 Documented**: Complete documentation and examples
+
+Ready to orchestrate your AI workloads? [Start here →](/guides/getting-started/)

@@ -12,7 +12,7 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, treefmt-nix }:
-    (flake-utils.lib.eachDefaultSystem (system:
+    flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
@@ -138,27 +138,5 @@
 
         # Code formatter using treefmt (nixpkgs-fmt, black, isort)
         formatter = treefmtEval.config.build.wrapper;
-
-        # NixOS VM tests for the SkyPilot module
-        checks = {
-          skypilot-simple = import ./tests/simple-test.nix {
-            inherit pkgs;
-          };
-          skypilot-module = import ./tests/skypilot-module.nix {
-            inherit pkgs;
-            inherit (pkgs) lib;
-          };
-        };
-      })) // {
-      # NixOS module for SkyPilot service
-      nixosModules = {
-        default = import ./nixos-modules/skypilot;
-        skypilot = import ./nixos-modules/skypilot;
-      };
-
-      # Overlay for other flakes to use
-      overlays.default = final: prev: {
-        skypilot = self.packages.${prev.system}.skypilot;
-      };
-    };
+      });
 }

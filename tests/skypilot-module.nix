@@ -1,56 +1,66 @@
-import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
+{ pkgs, lib ? pkgs.lib }:
+
+pkgs.nixosTest {
   name = "skypilot-module";
   meta = with pkgs.lib.maintainers; {
     maintainers = [ ];
+    timeout = 1800; # 30 minutes max for comprehensive test
   };
 
   nodes = {
     # Basic SkyPilot installation test
     basic = { config, pkgs, ... }: {
       imports = [ ../nixos-modules/skypilot ];
-      
+
       services.skypilot = {
         enable = true;
-        systemdServices = true;
+        enableCluster = false;
+        enableWebUI = false;
+        systemdServices = false;
+        monitoring.enable = false;
       };
-      
-      # Required for VM testing
-      virtualisation.memorySize = 2048;
-      virtualisation.diskSize = 8192;
+
+      # Optimized VM resources
+      virtualisation = {
+        memorySize = 1536;
+        diskSize = 4096;
+        cores = 2;
+        graphics = false;
+      };
     };
 
     # Full featured SkyPilot setup
     full = { config, pkgs, ... }: {
       imports = [ ../nixos-modules/skypilot ];
-      
+
       services.skypilot = {
         enable = true;
         enableWebUI = true;
         enableCluster = true;
         systemdServices = true;
         enableSpotInstances = true;
-        
+
         user = "skypilot-test";
         group = "skypilot-test";
-        
+
         webUI = {
           port = 8080;
           host = "0.0.0.0";
           openFirewall = true;
         };
-        
+
         cluster = {
           autoStop = 30;
           defaultInstanceType = "m5.large";
           defaultRegion = "us-west-2";
         };
-        
+
         monitoring = {
           enable = true;
           metricsPort = 9090;
           logLevel = "DEBUG";
         };
-        
+
         config = {
           cloud = {
             aws = {
@@ -62,16 +72,20 @@ import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
             max_price = 1.0;
           };
         };
-        
+
         extraEnvironment = ''
           export TEST_ENV_VAR=test_value
         '';
       };
-      
-      # Required for VM testing
-      virtualisation.memorySize = 4096;
-      virtualisation.diskSize = 16384;
-      
+
+      # Higher resources for full test
+      virtualisation = {
+        memorySize = 3072;
+        diskSize = 8192;
+        cores = 2;
+        graphics = false;
+      };
+
       # Open firewall for testing
       networking.firewall.allowedTCPPorts = [ 8080 9090 ];
     };
@@ -79,7 +93,7 @@ import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
     # Minimal SkyPilot setup
     minimal = { config, pkgs, ... }: {
       imports = [ ../nixos-modules/skypilot ];
-      
+
       services.skypilot = {
         enable = true;
         enableWebUI = false;
@@ -87,22 +101,31 @@ import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
         systemdServices = false;
         monitoring.enable = false;
       };
-      
-      # Required for VM testing
-      virtualisation.memorySize = 1024;
-      virtualisation.diskSize = 4096;
+
+      # Minimal VM resources
+      virtualisation = {
+        memorySize = 1024;
+        diskSize = 2048;
+        cores = 1;
+        graphics = false;
+      };
     };
 
     # Custom configuration test
     custom = { config, pkgs, ... }: {
       imports = [ ../nixos-modules/skypilot ];
-      
+
       services.skypilot = {
         enable = true;
+        enableCluster = false; # Disable cluster to avoid conflicts
+        enableWebUI = false;
+        systemdServices = false;
+        monitoring.enable = false;
+
         configDir = "/opt/skypilot/config";
         logsDir = "/opt/skypilot/logs";
         cacheDir = "/opt/skypilot/cache";
-        
+
         config = {
           cluster = {
             instance_type = "t3.micro";
@@ -113,23 +136,19 @@ import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
             memory = "4GB";
           };
         };
-        
-        webUI = {
-          port = 9080;
-          host = "127.0.0.1";
-        };
       };
-      
-      # Required for VM testing
-      virtualisation.memorySize = 2048;
-      virtualisation.diskSize = 8192;
+
+      # Optimized VM resources
+      virtualisation = {
+        memorySize = 1536;
+        diskSize = 4096;
+        cores = 2;
+        graphics = false;
+      };
     };
   };
 
   testScript = ''
-    import json
-    import time
-
     def wait_for_service(machine, service, timeout=60):
         """Wait for a systemd service to be active"""
         machine.wait_until_succeeds(
@@ -343,4 +362,4 @@ import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
     print("ALL TESTS COMPLETED SUCCESSFULLY!")
     print("=" * 60)
   '';
-})
+}

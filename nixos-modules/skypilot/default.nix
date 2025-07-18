@@ -1,46 +1,80 @@
+# SkyPilot NixOS Module
+# 
+# This module provides comprehensive SkyPilot integration for NixOS systems,
+# including service management, configuration generation, and cloud provider setup.
+#
+# Maintainers: [ ]
+# Documentation: ./skypilot.md
+
 { config, lib, pkgs, ... }:
 
 with lib;
+with lib.lists;
 
 let
   cfg = config.services.skypilot;
-  
+
   # Use the SkyPilot package from the overlay or build it locally
-  skypilot-pkg = if pkgs ? skypilot 
-    then pkgs.skypilot 
-    else pkgs.python3Packages.buildPythonApplication rec {
-      pname = "skypilot";
-      version = "0.9.3";
+  skypilot-pkg =
+    if pkgs ? skypilot
+    then pkgs.skypilot
+    else
+      pkgs.python3Packages.buildPythonApplication rec {
+        pname = "skypilot";
+        version = "0.9.3";
 
-      src = pkgs.fetchFromGitHub {
-        owner = "skypilot-org";
-        repo = "skypilot";
-        tag = "v${version}";
-        hash = "sha256-iKNvzGiKM4QSG25CusZ1YRIou010uWyMLEAaFIww+FA=";
+        src = pkgs.fetchFromGitHub {
+          owner = "skypilot-org";
+          repo = "skypilot";
+          tag = "v${version}";
+          hash = "sha256-iKNvzGiKM4QSG25CusZ1YRIou010uWyMLEAaFIww+FA=";
+        };
+
+        pyproject = true;
+        build-system = with pkgs.python3Packages; [ setuptools ];
+
+        propagatedBuildInputs = with pkgs.python3Packages; [
+          aiofiles
+          cachetools
+          click
+          colorama
+          cryptography
+          fastapi
+          filelock
+          httpx
+          jinja2
+          jsonschema
+          networkx
+          packaging
+          pandas
+          pendulum
+          prettytable
+          psutil
+          pydantic
+          python-dotenv
+          python-multipart
+          pyyaml
+          pulp
+          requests
+          rich
+          setproctitle
+          tabulate
+          typing-extensions
+          uvicorn
+          wheel
+        ];
+
+        meta = {
+          description = "Run LLMs and AI on any Cloud";
+          homepage = "https://github.com/skypilot-org/skypilot";
+          license = pkgs.lib.licenses.asl20;
+          mainProgram = "sky";
+        };
       };
 
-      pyproject = true;
-      build-system = with pkgs.python3Packages; [ setuptools ];
-
-      propagatedBuildInputs = with pkgs.python3Packages; [
-        aiofiles cachetools click colorama cryptography fastapi filelock
-        httpx jinja2 jsonschema networkx packaging pandas pendulum
-        prettytable psutil pydantic python-dotenv python-multipart
-        pyyaml pulp requests rich setproctitle tabulate typing-extensions
-        uvicorn wheel
-      ];
-
-      meta = {
-        description = "Run LLMs and AI on any Cloud";
-        homepage = "https://github.com/skypilot-org/skypilot";
-        license = pkgs.lib.licenses.asl20;
-        mainProgram = "sky";
-      };
-    };
-  
   # Configuration file for SkyPilot
   skypilotConfig = pkgs.writeText "skypilot-config.yaml" (generators.toYAML { } cfg.config);
-  
+
   # Environment script
   skypilotEnv = pkgs.writeShellScript "skypilot-env" ''
     export SKYPILOT_CONFIG_DIR=${cfg.configDir}
@@ -52,7 +86,8 @@ let
     ${cfg.extraEnvironment}
   '';
 
-in {
+in
+{
   options.services.skypilot = {
     enable = mkEnableOption "SkyPilot cloud orchestration service";
 
@@ -265,9 +300,11 @@ in {
       "d ${cfg.configDir} 0755 ${cfg.user} ${cfg.group} -"
       "d ${cfg.logsDir} 0755 ${cfg.user} ${cfg.group} -"
       "d ${cfg.cacheDir} 0755 ${cfg.user} ${cfg.group} -"
-    ] ++ (mapAttrsToList (cloud: credFile: 
-      "L+ ${cfg.configDir}/${cloud}-credentials 0600 ${cfg.user} ${cfg.group} - ${credFile}"
-    ) cfg.cloudCredentials);
+    ] ++ (mapAttrsToList
+      (cloud: credFile:
+        "L+ ${cfg.configDir}/${cloud}-credentials 0600 ${cfg.user} ${cfg.group} - ${credFile}"
+      )
+      cfg.cloudCredentials);
 
     # Install SkyPilot package system-wide
     environment.systemPackages = [ cfg.package ];
@@ -355,11 +392,12 @@ in {
     };
 
     # Firewall configuration
-    networking.firewall.allowedTCPPorts = mkIf cfg.webUI.openFirewall [ cfg.webUI.port ]
-      ++ mkIf cfg.monitoring.enable [ cfg.monitoring.metricsPort ];
+    networking.firewall.allowedTCPPorts =
+      (optionals (cfg.enableWebUI && cfg.webUI.openFirewall) [ cfg.webUI.port ]) ++
+      (optionals cfg.monitoring.enable [ cfg.monitoring.metricsPort ]);
 
     # Auto-stop timer for clusters
-    systemd.timers.skypilot-autostop = mkIf (cfg.cluster.autoStop != null) {
+    systemd.timers.skypilot-autostop = mkIf (cfg.enableCluster && cfg.cluster.autoStop != null) {
       description = "SkyPilot Auto-stop Timer";
       wantedBy = [ "timers.target" ];
       timerConfig = {
@@ -369,7 +407,7 @@ in {
       };
     };
 
-    systemd.services.skypilot-autostop = mkIf (cfg.cluster.autoStop != null) {
+    systemd.services.skypilot-autostop = mkIf (cfg.enableCluster && cfg.cluster.autoStop != null) {
       description = "SkyPilot Auto-stop Service";
       serviceConfig = {
         Type = "oneshot";
@@ -386,52 +424,84 @@ in {
       };
     };
 
-    # Security hardening
-    security.sudo.rules = mkIf cfg.enableCluster [
-      {
-        users = [ cfg.user ];
-        commands = [
-          {
-            command = "${cfg.package}/bin/sky";
-            options = [ "NOPASSWD" ];
-          }
-        ];
-      }
-    ];
+    # Note: Sudo rules for SkyPilot can be configured manually if needed
+    # security.sudo.rules = [
+    #   {
+    #     users = [ cfg.user ];
+    #     commands = [
+    #       {
+    #         command = "${cfg.package}/bin/sky";
+    #         options = [ "NOPASSWD" ];
+    #       }
+    #     ];
+    #   }
+    # ];
 
     # Kernel modules for container support
     boot.kernelModules = mkIf cfg.enableCluster [ "overlay" "br_netfilter" ];
 
     # System-wide SkyPilot configuration
     environment.etc."skypilot/config.yaml" = mkIf (cfg.config != { }) {
-      text = generators.toYAML { } (cfg.config // {
-        cluster = optionalAttrs (cfg.cluster.defaultInstanceType != null) {
-          default_instance_type = cfg.cluster.defaultInstanceType;
-        } // optionalAttrs (cfg.cluster.defaultRegion != null) {
-          default_region = cfg.cluster.defaultRegion;
-        };
-        spot = optionalAttrs cfg.enableSpotInstances {
-          enabled = true;
-        };
-      });
+      text = generators.toYAML { } (cfg.config //
+        (optionalAttrs cfg.enableCluster (
+          let
+            clusterConfig =
+              (optionalAttrs (cfg.cluster.defaultInstanceType != null) {
+                default_instance_type = cfg.cluster.defaultInstanceType;
+              }) //
+              (optionalAttrs (cfg.cluster.defaultRegion != null) {
+                default_region = cfg.cluster.defaultRegion;
+              });
+          in
+          optionalAttrs (clusterConfig != { }) {
+            cluster = clusterConfig;
+          }
+        )) //
+        (optionalAttrs cfg.enableSpotInstances {
+          spot = {
+            enabled = true;
+          };
+        })
+      );
       mode = "0644";
     };
 
-    # Assertions
+    # Comprehensive validation and assertions
     assertions = [
       {
-        assertion = cfg.enableWebUI -> cfg.webUI.port > 0;
-        message = "SkyPilot web UI port must be greater than 0";
+        assertion = cfg.enableWebUI -> cfg.webUI.port > 0 && cfg.webUI.port < 65536;
+        message = "SkyPilot web UI port must be between 1 and 65535 (got ${toString cfg.webUI.port})";
       }
       {
-        assertion = cfg.monitoring.enable -> cfg.monitoring.metricsPort > 0;
-        message = "SkyPilot monitoring metrics port must be greater than 0";
+        assertion = cfg.monitoring.enable -> cfg.monitoring.metricsPort > 0 && cfg.monitoring.metricsPort < 65536;
+        message = "SkyPilot monitoring metrics port must be between 1 and 65535 (got ${toString cfg.monitoring.metricsPort})";
       }
       {
-        assertion = cfg.cluster.autoStop == null || cfg.cluster.autoStop > 0;
-        message = "SkyPilot auto-stop time must be greater than 0 minutes";
+        assertion = !cfg.enableCluster || cfg.cluster.autoStop == null || cfg.cluster.autoStop > 0;
+        message = "SkyPilot auto-stop time must be greater than 0 minutes or null to disable";
+      }
+      {
+        assertion = cfg.enableWebUI && cfg.monitoring.enable -> cfg.webUI.port != cfg.monitoring.metricsPort;
+        message = "SkyPilot web UI port (${toString cfg.webUI.port}) cannot be the same as monitoring port (${toString cfg.monitoring.metricsPort})";
+      }
+      {
+        assertion = cfg.user != "root";
+        message = "SkyPilot should not run as root user for security reasons";
+      }
+      {
+        assertion = lib.hasPrefix "/" (toString cfg.configDir) && lib.hasPrefix "/" (toString cfg.logsDir) && lib.hasPrefix "/" (toString cfg.cacheDir);
+        message = "SkyPilot directory paths must be absolute paths starting with '/'";
       }
     ];
+
+    # Helpful warnings for common configuration issues
+    warnings =
+      optional (!cfg.enableCluster && cfg.enableWebUI)
+        "SkyPilot web UI is enabled but cluster management is disabled. Some UI features may not work." ++
+      optional (cfg.enableWebUI && !cfg.webUI.openFirewall && cfg.webUI.host != "127.0.0.1")
+        "SkyPilot web UI is bound to ${cfg.webUI.host} but firewall is not opened. External access may be blocked." ++
+      optional (cfg.monitoring.enable && cfg.monitoring.logLevel == "DEBUG")
+        "SkyPilot monitoring is set to DEBUG level. This may generate excessive logs in production.";
   };
 
   meta = {

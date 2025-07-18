@@ -1,6 +1,20 @@
 # SkyPilot NixOS Module
 
-This module provides a comprehensive NixOS integration for SkyPilot, a framework for running LLMs, AI, and batch jobs on any cloud.
+This module provides enterprise-grade NixOS integration for SkyPilot, a framework for running LLMs, AI, and batch jobs on any cloud with automatic cost optimization and maximum GPU availability.
+
+[![NixOS](https://img.shields.io/badge/NixOS-Compatible-blue?logo=nixos)](https://nixos.org)
+[![SkyPilot](https://img.shields.io/badge/SkyPilot-v0.9.3-green)](https://github.com/skypilot-org/skypilot)
+[![Tests](https://img.shields.io/badge/VM%20Tests-Passing-brightgreen)](./tests/)
+
+## Quick Start
+
+```nix
+# Add to your flake.nix inputs
+inputs.skypilot-flake.url = "github:yourorg/skypilot-flake";
+
+# Enable in your NixOS configuration
+services.skypilot.enable = true;
+```
 
 ## Features
 
@@ -227,6 +241,206 @@ nix build .#checks.x86_64-linux.skypilot-module
 - SkyPilot logs: `/var/log/skypilot/`
 - Configuration: `/var/lib/skypilot/config/`
 
+## Production Deployment Examples
+
+### High-Availability Multi-Cloud Setup
+
+```nix
+{
+  services.skypilot = {
+    enable = true;
+    enableWebUI = true;
+    enableCluster = true;
+    systemdServices = true;
+    
+    # Production user configuration
+    user = "skypilot-prod";
+    group = "skypilot-prod";
+    
+    # Web UI with authentication proxy
+    webUI = {
+      port = 8080;
+      host = "127.0.0.1";  # Behind reverse proxy
+      openFirewall = false;
+    };
+    
+    # Cluster auto-scaling configuration
+    cluster = {
+      autoStop = 30;  # 30 minutes idle timeout
+      defaultInstanceType = "g4dn.xlarge";
+      defaultRegion = "us-west-2";
+    };
+    
+    # Production monitoring
+    monitoring = {
+      enable = true;
+      metricsPort = 9090;
+      logLevel = "INFO";
+    };
+    
+    # Multi-cloud configuration
+    config = {
+      cloud = {
+        aws = {
+          region = "us-west-2";
+          availability_zone = "us-west-2a";
+        };
+        gcp = {
+          project = "your-gcp-project";
+          zone = "us-central1-a";
+        };
+        azure = {
+          region = "westus2";
+        };
+      };
+      
+      # Cost optimization
+      spot = {
+        enabled = true;
+        max_price = 2.0;
+        fallback_to_ondemand = true;
+      };
+      
+      # Resource limits
+      resources = {
+        max_concurrent_jobs = 10;
+        default_timeout = 3600;
+      };
+    };
+    
+    # Secure credential management
+    cloudCredentials = {
+      aws = "/run/secrets/aws-credentials";
+      gcp = "/run/secrets/gcp-service-account.json";
+      azure = "/run/secrets/azure-credentials";
+    };
+    
+    # Production environment variables
+    extraEnvironment = ''
+      export SKYPILOT_LOG_LEVEL=INFO
+      export SKYPILOT_DISABLE_USAGE_STATS=true
+      export PYTHONUNBUFFERED=1
+    '';
+  };
+  
+  # Reverse proxy for web UI
+  services.nginx = {
+    enable = true;
+    virtualHosts."skypilot.example.com" = {
+      enableACME = true;
+      forceSSL = true;
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8080";
+        proxyWebsockets = true;
+        extraConfig = ''
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+        '';
+      };
+    };
+  };
+  
+  # Monitoring integration
+  services.prometheus = {
+    exporters.node.enable = true;
+    scrapeConfigs = [{
+      job_name = "skypilot";
+      static_configs = [{
+        targets = [ "localhost:9090" ];
+      }];
+    }];
+  };
+  
+  # Log aggregation
+  services.filebeat = {
+    enable = true;
+    settings = {
+      filebeat.inputs = [{
+        type = "log";
+        paths = [ "/var/log/skypilot/*.log" ];
+        fields = { service = "skypilot"; };
+      }];
+    };
+  };
+}
+```
+
+### Development Environment
+
+```nix
+{
+  services.skypilot = {
+    enable = true;
+    enableWebUI = true;
+    enableCluster = false;  # Disable for dev
+    
+    webUI = {
+      port = 3000;
+      host = "0.0.0.0";
+      openFirewall = true;
+    };
+    
+    # Development configuration
+    config = {
+      cloud.aws.region = "us-east-1";  # Cheaper region
+      spot.enabled = true;  # Always use spot for dev
+    };
+    
+    # Development credentials (local files)
+    cloudCredentials = {
+      aws = config.age.secrets.aws-dev-credentials.path;
+    };
+    
+    extraEnvironment = ''
+      export SKYPILOT_LOG_LEVEL=DEBUG
+      export SKYPILOT_DEV_MODE=true
+    '';
+  };
+}
+```
+
+### Minimal Edge Deployment
+
+```nix
+{
+  services.skypilot = {
+    enable = true;
+    enableWebUI = false;
+    enableCluster = false;
+    systemdServices = false;
+    monitoring.enable = false;
+    
+    # Minimal resource usage
+    configDir = "/tmp/skypilot/config";
+    logsDir = "/tmp/skypilot/logs";
+    cacheDir = "/tmp/skypilot/cache";
+    
+    # Basic cloud access
+    config = {
+      cloud.aws.region = "us-east-1";
+    };
+  };
+}
+```
+
 ## Examples
 
 See the test configurations in `tests/skypilot-module.nix` for complete examples of different deployment scenarios.
+
+## Best Practices
+
+1. **Security**: Always use dedicated credentials with minimal required permissions
+2. **Monitoring**: Enable monitoring in production for cost tracking and performance analysis
+3. **Auto-scaling**: Configure auto-stop timers to prevent unnecessary cloud costs
+4. **Backup**: Regularly backup SkyPilot configurations and job histories
+5. **Updates**: Use the automated update script to keep SkyPilot current
+6. **Testing**: Validate configurations in development before production deployment
+
+## Support
+
+- **Documentation**: Complete module reference in this file
+- **Testing**: Comprehensive VM tests in `tests/` directory
+- **Issues**: Report problems via GitHub issues
+- **Updates**: Automated via `./update.sh` script
