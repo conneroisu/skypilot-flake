@@ -1,0 +1,37 @@
+[
+  {
+    "session_id": "4d72d113-9dd1-4859-b6d0-a727a8035608",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/4d72d113-9dd1-4859-b6d0-a727a8035608.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "Notification",
+    "message": "Claude is waiting for your input"
+  },
+  {
+    "session_id": "1af3dae1-546d-4270-a463-71c2c55677c9",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/1af3dae1-546d-4270-a463-71c2c55677c9.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "Notification",
+    "message": "Claude is waiting for your input"
+  },
+  {
+    "session_id": "ba6ec81c-e7b2-4536-afb4-d3337219c023",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/ba6ec81c-e7b2-4536-afb4-d3337219c023.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "Notification",
+    "message": "Claude is waiting for your input"
+  },
+  {
+    "session_id": "ba6ec81c-e7b2-4536-afb4-d3337219c023",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/ba6ec81c-e7b2-4536-afb4-d3337219c023.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "Notification",
+    "message": "Claude is waiting for your input"
+  },
+  {
+    "session_id": "ba6ec81c-e7b2-4536-afb4-d3337219c023",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/ba6ec81c-e7b2-4536-afb4-d3337219c023.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "Notification",
+    "message": "Claude is waiting for your input"
+  }
+]

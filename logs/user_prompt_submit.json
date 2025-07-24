@@ -1,0 +1,65 @@
+[
+  {
+    "session_id": "4d72d113-9dd1-4859-b6d0-a727a8035608",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/4d72d113-9dd1-4859-b6d0-a727a8035608.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Verify It Fully Once More"
+  },
+  {
+    "session_id": "1af3dae1-546d-4270-a463-71c2c55677c9",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/1af3dae1-546d-4270-a463-71c2c55677c9.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Polish Docs and Code Comments"
+  },
+  {
+    "session_id": "4d72d113-9dd1-4859-b6d0-a727a8035608",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/4d72d113-9dd1-4859-b6d0-a727a8035608.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Create and implementation of a configurable skypilot nix module and Write Nixos VM tests and verify the implementation."
+  },
+  {
+    "session_id": "1af3dae1-546d-4270-a463-71c2c55677c9",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/1af3dae1-546d-4270-a463-71c2c55677c9.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Commit "
+  },
+  {
+    "session_id": "28e73a01-7895-4cae-9d0a-86ee0c5fce5a",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/28e73a01-7895-4cae-9d0a-86ee0c5fce5a.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Update documentation astro site in @docs/ "
+  },
+  {
+    "session_id": "65ab8f0a-ba06-4f36-9e05-ad24e9d7e90d",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/65ab8f0a-ba06-4f36-9e05-ad24e9d7e90d.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "/init "
+  },
+  {
+    "session_id": "ba6ec81c-e7b2-4536-afb4-d3337219c023",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/ba6ec81c-e7b2-4536-afb4-d3337219c023.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "continue"
+  },
+  {
+    "session_id": "ba6ec81c-e7b2-4536-afb4-d3337219c023",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/ba6ec81c-e7b2-4536-afb4-d3337219c023.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "continue"
+  },
+  {
+    "session_id": "ba6ec81c-e7b2-4536-afb4-d3337219c023",
+    "transcript_path": "/home/connerohnesorge/.claude/projects/-home-connerohnesorge-Documents-001Repos-skypilot-flake/ba6ec81c-e7b2-4536-afb4-d3337219c023.jsonl",
+    "cwd": "/home/connerohnesorge/Documents/001Repos/skypilot-flake",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "polish"
+  }
+]
